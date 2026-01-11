@@ -134,12 +134,23 @@ async function sendWaitlistEmail({ email, fullName }) {
 </html>
   `;
 
-  await transporter.sendMail({
-    from: process.env.SMTP_FROM,
-    to: email,
-    subject: "You’re In! One More Step",
-    html,
-  });
+   try {
+    const info = await transporter.sendMail({
+      from: process.env.SMTP_FROM,
+      to: email,
+      subject: "You’re In! One More Step",
+      html,
+    });
+
+    console.log(`✅ Email sent to ${email}: ${info.messageId}`);
+    console.log(`Preview URL (if using ethereal): ${nodemailer.getTestMessageUrl(info) || "N/A"}`);
+  } catch (error) {
+    console.error(`❌ Failed to send email to ${email}`);
+    console.error("Error details:", error);
+    if (error.response) console.error("SMTP Response:", error.response);
+    if (error.code) console.error("Error Code:", error.code);
+  }
 }
+
 
 module.exports = sendWaitlistEmail;
